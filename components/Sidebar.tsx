@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@lib/supabase/client';
 
 const items = [
   { label: 'Dashboard', href: '/dashboard' },
