@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '.../supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export function useRequireAuth() {
@@ -9,7 +9,7 @@ export function useRequireAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then((res) => {
+    supabase.auth.getSession().then((res) => {
       // If no session, redirect to /login
       if (!res?.data?.session) {
         router.push('/login');
