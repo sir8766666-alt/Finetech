@@ -83,7 +83,7 @@ src/
     supabase/
       client.ts         # createBrowserClient from @supabase/ssr
       server.ts         # createServerClient with cookies()
-      middleware.ts     # Session refresh + redirect logic
+      proxy.ts         # Session refresh + redirect logic (root-level)
   types/
     supabase.ts         # Database types (pre-generated)
 ```
