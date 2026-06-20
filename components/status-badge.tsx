@@ -8,7 +8,8 @@ type StatusType =
   | "pending"
   | "paid"
   | "draft"
-  | "sent";
+  | "sent"
+  | "overdue";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -23,6 +24,7 @@ const statusStyles: Record<StatusType, string> = {
   paid: "bg-green-100 text-green-800",
   draft: "bg-gray-100 text-gray-800",
   sent: "bg-blue-100 text-blue-800",
+  overdue: "bg-red-100 text-red-800",
 };
 
 const statusLabels: Record<StatusType, string> = {
@@ -34,17 +36,21 @@ const statusLabels: Record<StatusType, string> = {
   paid: "Paid",
   draft: "Draft",
   sent: "Sent",
+  overdue: "Overdue",
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  const style = statusStyles[status] || "bg-gray-100 text-gray-800";
+  const label = statusLabels[status] || status;
+
   return (
     <span
       className={cn(
         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-        statusStyles[status]
+        style
       )}
     >
-      {statusLabels[status]}
+      {label}
     </span>
   );
 }

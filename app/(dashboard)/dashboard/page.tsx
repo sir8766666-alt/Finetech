@@ -9,6 +9,7 @@ import {
   Wallet,
   Clock,
   FileText,
+  ArrowDownCircle,
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -31,6 +32,11 @@ export default async function DashboardPage() {
   const pendingReceivables =
     dues.data
       ?.filter((d) => d.type === "receivable" && d.status === "pending")
+      .reduce((sum, d) => sum + d.amount, 0) ?? 0;
+
+  const pendingPayables =
+    dues.data
+      ?.filter((d) => d.type === "payable" && d.status === "pending")
       .reduce((sum, d) => sum + d.amount, 0) ?? 0;
 
   const totalInvoiceAmount =
@@ -138,6 +144,14 @@ export default async function DashboardPage() {
             currency: "USD",
           }).format(pendingReceivables)}
           icon={Clock}
+        />
+        <StatCard
+          title="Pending Payables"
+          value={new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(pendingPayables)}
+          icon={ArrowDownCircle}
         />
         <StatCard
           title="Total Invoices"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, LinkIcon } from "lucide-react";
+import { Upload, LinkIcon, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ interface ReceiptUploadProps {
 export function ReceiptUpload({ value, onChange }: ReceiptUploadProps) {
   const [mode, setMode] = useState<"upload" | "link">("link");
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,6 +22,7 @@ export function ReceiptUpload({ value, onChange }: ReceiptUploadProps) {
     if (!file) return;
 
     setUploading(true);
+    setUploadError(null);
     const supabase = createClient();
     const fileExt = file.name.split(".").pop();
     const fileName = `${Math.random()}.${fileExt}`;
@@ -30,7 +32,9 @@ export function ReceiptUpload({ value, onChange }: ReceiptUploadProps) {
       .from("receipts")
       .upload(filePath, file);
 
-    if (!error) {
+    if (error) {
+      setUploadError(error.message || "Upload failed");
+    } else {
       const {
         data: { publicUrl },
       } = supabase.storage.from("receipts").getPublicUrl(filePath);
@@ -63,6 +67,10 @@ export function ReceiptUpload({ value, onChange }: ReceiptUploadProps) {
         </Button>
       </div>
 
+      {uploadError && (
+        <p className="text-sm text-red-600">{uploadError}</p>
+      )}
+
       {mode === "link" ? (
         <Input
           placeholder="https://example.com/receipt.jpg"
@@ -78,16 +86,33 @@ export function ReceiptUpload({ value, onChange }: ReceiptUploadProps) {
             className="hidden"
             onChange={handleFileUpload}
           />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? "Uploading..." : "Choose File"}
-          </Button>
-          {value && (
-            <p className="text-sm text-green-600 mt-1">File uploaded</p>
+          {value ? (
+            <div className="flex items-center gap-2">
+              <a
+                href={value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-green-600 underline truncate max-w-[200px]"
+              >
+                Receipt uploaded
+              </a>
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? "Uploading..." : "Choose File"}
+            </Button>
           )}
         </div>
       )}

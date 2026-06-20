@@ -38,6 +38,26 @@ export async function createDue(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
+export async function updateDue(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const data = {
+    party_name: formData.get("party_name") as string,
+    amount: parseFloat(formData.get("amount") as string),
+    due_date: formData.get("due_date") as string,
+  };
+
+  const { error } = await supabase
+    .from("dues")
+    .update(data)
+    .eq("id", id);
+
+  if (error) throw error;
+
+  revalidatePath("/dues");
+  revalidatePath("/dashboard");
+}
+
 export async function updateDueStatus(id: string, status: string) {
   const supabase = await createClient();
 
