@@ -40,6 +40,7 @@ export function NavSidebar() {
   }, []);
 
   async function signOut() {
+    setShowProfileModal(false);
     await supabase.auth.signOut();
     router.push("/login");
   }
