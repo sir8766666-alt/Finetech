@@ -7,7 +7,10 @@ export default async function ProjectsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: projects } = await supabase.from("projects").select("*");
+  const { data: projects } = await supabase
+    .from("projects")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   return <ProjectsClient initialProjects={projects || []} />;
 }

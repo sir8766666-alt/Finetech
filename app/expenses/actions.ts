@@ -15,9 +15,11 @@ const expenseSchema = z.object({
 
 export async function createExpense(formData: FormData) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
 
   const data = {
-    project_id: formData.get("project_id") as string || null,
+    project_id: (formData.get("project_id") as string) || null,
     category: formData.get("category") as string,
     amount: parseFloat(formData.get("amount") as string),
     date: formData.get("date") as string,
@@ -27,7 +29,10 @@ export async function createExpense(formData: FormData) {
 
   const validated = expenseSchema.parse(data);
 
-  const { error } = await supabase.from("expenses").insert(validated);
+  const { error } = await supabase.from("expenses").insert({
+    ...validated,
+    user_id: user.id,
+  });
 
   if (error) throw error;
 
@@ -39,7 +44,7 @@ export async function updateExpense(id: string, formData: FormData) {
   const supabase = await createClient();
 
   const data = {
-    project_id: formData.get("project_id") as string || null,
+    project_id: (formData.get("project_id") as string) || null,
     category: formData.get("category") as string,
     amount: parseFloat(formData.get("amount") as string),
     date: formData.get("date") as string,

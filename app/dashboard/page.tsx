@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/stat-card";
 import { IncomeExpenseChart } from "@/components/income-expense-chart";
 import { BudgetProgress } from "@/components/budget-progress";
-import { redirect } from "next/navigation";
 import {
   DollarSign,
   TrendingUp,
@@ -14,8 +13,6 @@ import {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
   const [projects, income, expenses, dues, invoices] = await Promise.all([
     supabase.from("projects").select("*"),

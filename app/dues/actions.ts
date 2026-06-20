@@ -14,6 +14,8 @@ const dueSchema = z.object({
 
 export async function createDue(formData: FormData) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
 
   const data = {
     type: formData.get("type") as string,
@@ -25,7 +27,10 @@ export async function createDue(formData: FormData) {
 
   const validated = dueSchema.parse(data);
 
-  const { error } = await supabase.from("dues").insert(validated);
+  const { error } = await supabase.from("dues").insert({
+    ...validated,
+    user_id: user.id,
+  });
 
   if (error) throw error;
 

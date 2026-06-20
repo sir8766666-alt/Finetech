@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
@@ -28,22 +28,25 @@ const navigation = [
 
 export function NavSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  const isLoginPage = pathname === "/login";
 
   useEffect(() => {
+    if (isLoginPage) return;
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.email) setUserEmail(data.user.email);
     });
-  }, []);
+  }, [isLoginPage]);
 
   async function signOut() {
     setShowProfileModal(false);
     await supabase.auth.signOut();
-    router.push("/login");
+    window.location.href = "/login";
   }
+
+  if (isLoginPage) return null;
 
   return (
     <>

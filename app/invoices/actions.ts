@@ -14,6 +14,8 @@ const invoiceSchema = z.object({
 
 export async function createInvoice(formData: FormData) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
 
   const data = {
     client_name: formData.get("client_name") as string,
@@ -25,7 +27,10 @@ export async function createInvoice(formData: FormData) {
 
   const validated = invoiceSchema.parse(data);
 
-  const { error } = await supabase.from("invoices").insert(validated);
+  const { error } = await supabase.from("invoices").insert({
+    ...validated,
+    user_id: user.id,
+  });
 
   if (error) throw error;
 
