@@ -28,25 +28,29 @@ const navigation = [
 
 export function NavSidebar() {
   const pathname = usePathname();
-  const [userEmail, setUserEmail] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userEmail") || "";
+    }
+    return "";
+  });
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  const isLoginPage = pathname === "/login";
-
   useEffect(() => {
-    if (isLoginPage) return;
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email) setUserEmail(data.user.email);
+      if (data.user?.email) {
+        setUserEmail(data.user.email);
+        localStorage.setItem("userEmail", data.user.email);
+      }
     });
-  }, [isLoginPage]);
+  }, []);
 
   async function signOut() {
     setShowProfileModal(false);
+    localStorage.removeItem("userEmail");
     await supabase.auth.signOut();
     window.location.href = "/login";
   }
-
-  if (isLoginPage) return null;
 
   return (
     <>
@@ -64,7 +68,7 @@ export function NavSidebar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                    "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
                     isActive
                       ? "bg-gray-100 text-gray-900"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -158,7 +162,7 @@ export function NavSidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap",
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors",
                   isActive
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"

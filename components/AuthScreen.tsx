@@ -74,112 +74,134 @@ export default function AuthScreen() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #ecfdf5 100%)' }}>
-      <div className="w-full max-w-5xl mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-white rounded-2xl shadow-2xl overflow-hidden min-h-[540px] border border-gray-100">
-          {/* Dark text panel */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`text-${mode}`}
-              initial={{ opacity: 0, x: mode === 'signup' ? -40 : 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: mode === 'signup' ? 40 : -40 }}
-              transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-              className={`relative flex flex-col items-center justify-center p-12 text-center ${
-                mode === 'signup' ? 'md:order-1' : 'md:order-2'
-              }`}
+    <div className="min-h-screen flex items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #ecfdf5 100%)' }}>
+      <div className="w-full max-w-4xl mx-auto px-4">
+        <div className="relative h-[520px] rounded-2xl shadow-2xl overflow-hidden bg-white border border-gray-100">
+          {/* Left door (text panel) */}
+          <motion.div
+            animate={{
+              x: mode === 'signup' ? '0%' : '100%',
+            }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute inset-y-0 left-0 w-1/2 z-20"
+          >
+            <div
+              className="h-full flex flex-col items-center justify-center p-8 text-center"
               style={{ background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 100%)' }}
             >
-              <h1
-                className="text-4xl md:text-5xl font-bold mb-4 leading-tight"
-                style={{
-                  fontFamily: "'Georgia', serif",
-                  color: '#22c55e',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {mode === 'signup' ? 'Create your account' : 'Welcome back'}
-              </h1>
-              <p className="text-white/60 text-lg max-w-xs">
-                {mode === 'signup'
-                  ? 'Start managing your finances today.'
-                  : 'Sign in to continue to your dashboard.'}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={mode}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <h1
+                    className="text-3xl lg:text-4xl font-bold mb-3 leading-tight"
+                    style={{
+                      fontFamily: "'Georgia', serif",
+                      color: '#22c55e',
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
+                    {mode === 'signup' ? 'Create your account' : 'Welcome back'}
+                  </h1>
+                  <p className="text-white/60 text-base max-w-[240px] mx-auto">
+                    {mode === 'signup'
+                      ? 'Start managing your finances today.'
+                      : 'Sign in to continue to your dashboard.'}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
 
-          {/* Form panel */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`form-${mode}`}
-              initial={{ opacity: 0, x: mode === 'signup' ? 40 : -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: mode === 'signup' ? -40 : 40 }}
-              transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-              className={`flex items-center justify-center p-10 ${
-                mode === 'signup' ? 'md:order-2' : 'md:order-1'
-              }`}
-            >
+          {/* Right door (form panel) */}
+          <motion.div
+            animate={{
+              x: mode === 'signup' ? '0%' : '-100%',
+            }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute inset-y-0 right-0 w-1/2 z-20"
+          >
+            <div className="h-full flex items-center justify-center p-6 lg:p-8">
               <div className="w-full max-w-sm">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                  {mode === 'signup' ? 'Sign Up' : 'Sign In'}
-                </h2>
-                <p className="text-sm text-gray-500 mb-6">
-                  {mode === 'signup'
-                    ? 'Create your account to get started.'
-                    : 'Welcome back! Please enter your details.'}
-                </p>
+                <AnimatePresence mode="wait">
+                  {mode === 'signup' ? (
+                    <motion.div
+                      key="signup"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3, delay: 0.15 }}
+                    >
+                      <h2 className="text-2xl font-bold text-gray-900 mb-1">Sign Up</h2>
+                      <p className="text-sm text-gray-500 mb-5">Create your account to get started.</p>
+                      <form onSubmit={handleSubmitSignUp(onSubmitSignUp)} className="space-y-3">
+                        <Input label="Name" {...registerSignUp('name')} error={signUpErrors.name?.message} />
+                        <Input label="Email" {...registerSignUp('email')} error={signUpErrors.email?.message} />
+                        <Input label="Password" type="password" {...registerSignUp('password')} error={signUpErrors.password?.message} />
+                        <Input label="Confirm Password" type="password" {...registerSignUp('confirmPassword')} error={signUpErrors.confirmPassword?.message} />
 
-                {mode === 'signup' ? (
-                  <form onSubmit={handleSubmitSignUp(onSubmitSignUp)} className="space-y-4">
-                    <Input label="Name" {...registerSignUp('name')} error={signUpErrors.name?.message} />
-                    <Input label="Email" {...registerSignUp('email')} error={signUpErrors.email?.message} />
-                    <Input label="Password" type="password" {...registerSignUp('password')} error={signUpErrors.password?.message} />
-                    <Input label="Confirm Password" type="password" {...registerSignUp('confirmPassword')} error={signUpErrors.confirmPassword?.message} />
+                        {error && <p className="text-sm text-red-600">{error}</p>}
 
-                    {error && <p className="text-sm text-red-600">{error}</p>}
+                        <Button type="submit" disabled={loading} className="w-full">
+                          {loading ? 'Creating...' : 'Create Account'}
+                        </Button>
 
-                    <Button type="submit" disabled={loading} className="w-full">
-                      {loading ? 'Creating...' : 'Create Account'}
-                    </Button>
+                        <p className="text-sm text-gray-500 text-center pt-1">
+                          Already have an account?{' '}
+                          <button
+                            type="button"
+                            className="font-semibold text-green-600 hover:text-green-700"
+                            onClick={() => { setMode('signin'); resetSignIn(); setError(null); }}
+                          >
+                            Sign In
+                          </button>
+                        </p>
+                      </form>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="signin"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3, delay: 0.15 }}
+                    >
+                      <h2 className="text-2xl font-bold text-gray-900 mb-1">Sign In</h2>
+                      <p className="text-sm text-gray-500 mb-5">Welcome back! Please enter your details.</p>
+                      <form onSubmit={handleSubmitSignIn(onSubmitSignIn)} className="space-y-3">
+                        <Input label="Email" {...registerSignIn('email')} error={signInErrors.email?.message} />
+                        <Input label="Password" type="password" {...registerSignIn('password')} error={signInErrors.password?.message} />
 
-                    <p className="text-sm text-gray-500 text-center">
-                      Already have an account?{' '}
-                      <button
-                        type="button"
-                        className="font-semibold text-green-600 hover:text-green-700"
-                        onClick={() => { setMode('signin'); resetSignIn(); setError(null); }}
-                      >
-                        Sign In
-                      </button>
-                    </p>
-                  </form>
-                ) : (
-                  <form onSubmit={handleSubmitSignIn(onSubmitSignIn)} className="space-y-4">
-                    <Input label="Email" {...registerSignIn('email')} error={signInErrors.email?.message} />
-                    <Input label="Password" type="password" {...registerSignIn('password')} error={signInErrors.password?.message} />
+                        {error && <p className="text-sm text-red-600">{error}</p>}
 
-                    {error && <p className="text-sm text-red-600">{error}</p>}
+                        <Button type="submit" disabled={loading} className="w-full">
+                          {loading ? 'Signing in...' : 'Sign In'}
+                        </Button>
 
-                    <Button type="submit" disabled={loading} className="w-full">
-                      {loading ? 'Signing in...' : 'Sign In'}
-                    </Button>
-
-                    <p className="text-sm text-gray-500 text-center">
-                      Don&apos;t have an account?{' '}
-                      <button
-                        type="button"
-                        className="font-semibold text-green-600 hover:text-green-700"
-                        onClick={() => { setMode('signup'); resetSignUp(); setError(null); }}
-                      >
-                        Sign Up
-                      </button>
-                    </p>
-                  </form>
-                )}
+                        <p className="text-sm text-gray-500 text-center pt-1">
+                          Don&apos;t have an account?{' '}
+                          <button
+                            type="button"
+                            className="font-semibold text-green-600 hover:text-green-700"
+                            onClick={() => { setMode('signup'); resetSignUp(); setError(null); }}
+                          >
+                            Sign Up
+                          </button>
+                        </p>
+                      </form>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
+          </motion.div>
+
+          {/* Background - visible through gaps during animation */}
+          <div className="absolute inset-0 bg-gray-50 z-10" />
         </div>
       </div>
     </div>
