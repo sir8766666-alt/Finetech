@@ -13,8 +13,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Finance Module",
-  description: "Finance management application",
+  metadataBase: new URL("https://your-domain.com"),
+  title: "Fintech Man",
+  description: "A smart fintech application for modern finance management.",
+  openGraph: {
+    title: "Fintech Man",
+    description: "A smart fintech application for modern finance management.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Fintech Man Logo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Fintech Man",
+    description: "A smart fintech application for modern finance management.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({
