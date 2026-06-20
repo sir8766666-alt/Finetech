@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://your-domain.com"),
+  metadataBase: new URL("https://finetech-nine.vercel.app/"),
   title: "Fintech Man",
   description: "A smart fintech application for modern finance management.",
   openGraph: {
-    title: "Fintech Man",
+    title: "Fintech ",
     description: "A smart fintech application for modern finance management.",
     images: [
       {
