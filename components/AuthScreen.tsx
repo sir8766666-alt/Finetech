@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, signInSchema, SignUpInput, SignInInput } from '../lib/validation/auth';
-import { z } from 'zod';
 import { supabase } from '../lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Input from './Input';
@@ -13,15 +12,12 @@ import Button from './Button';
 
 type Mode = 'signup' | 'signin';
 
-const containerStyle = 'min-h-screen flex items-center justify-center';
-
 export default function AuthScreen() {
   const [mode, setMode] = useState<Mode>('signup');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Forms
   const {
     register: registerSignUp,
     handleSubmit: handleSubmitSignUp,
@@ -35,28 +31,6 @@ export default function AuthScreen() {
     formState: { errors: signInErrors },
     reset: resetSignIn,
   } = useForm<SignInInput>({ resolver: zodResolver(signInSchema) });
-
-  // Clip paths for two diagonal states and center horizontal
-  const clipUp = 'polygon(0 0, 100% 0, 100% 40%, 0 60%)'; // beige top
-  const clipCenter = 'polygon(0 0, 100% 0, 100% 50%, 0 50%)';
-  const clipDown = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'; // beige bottom (we'll show reversed zones using layering)
-
-  // We'll animate between two polygon shapes representing the beige zone.
-  const [clipPath, setClipPath] = useState<string>(clipUp);
-  useEffect(() => {
-    // Animate the clip path sequence when mode changes
-    if (mode === 'signup') {
-      // beige upper -> ensure clipUp
-      setClipPath(clipCenter);
-      const t = setTimeout(() => setClipPath(clipUp), 450);
-      return () => clearTimeout(t);
-    } else {
-      // signin: animate to center then to down
-      setClipPath(clipCenter);
-      const t = setTimeout(() => setClipPath('polygon(0 40%, 100% 60%, 100% 100%, 0 100%)'), 450);
-      return () => clearTimeout(t);
-    }
-  }, [mode]);
 
   async function onSubmitSignUp(data: SignUpInput) {
     setError(null);
@@ -72,8 +46,8 @@ export default function AuthScreen() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Unknown error');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -92,144 +66,152 @@ export default function AuthScreen() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Unknown error');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   }
 
+  const headingText = mode === 'signup' ? 'Create your account' : 'Welcome back';
+  const subText = mode === 'signup'
+    ? 'Start managing your finances today.'
+    : 'Sign in to continue to your dashboard.';
+  const linkText = mode === 'signup'
+    ? { prefix: 'Already have an account? ', action: 'Sign In' }
+    : { prefix: "Don't have an account? ", action: 'Sign Up' };
+
   return (
-    <div className={`${containerStyle} bg-transparent`}>
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          initial={false}
-          animate={{ clipPath }}
-          transition={{ duration: 0.45, ease: 'easeInOut' }}
-          style={{ background: '#EDE6D6', width: '100%', height: '100%' }}
-          className="absolute inset-0"
-        />
-        <div
-          style={{ background: '#FFF9F2' }}
-          className="absolute inset-0"
-        />
-      </div>
-
-      <div className="relative z-10 w-full max-w-6xl mx-auto p-6 md:p-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Left area / background heading - visible in signin state */}
-          <div className="hidden md:flex items-center justify-center">
-            <AnimatePresence>
-              {mode === 'signin' && (
-                <motion.h1
-                  key="welcome"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 0.08, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: 0.25, duration: 0.6 }}
-                  className="text-6xl md:text-7xl font-semibold text-black tracking-tight select-none"
-                  style={{ fontSize: '5rem', lineHeight: 1 }}
+    <div className="min-h-screen flex items-center justify-center bg-[#FFF9F2]">
+      <div className="w-full max-w-5xl mx-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-white rounded-2xl shadow-xl overflow-hidden min-h-[520px]">
+          {/* Text side - animates position based on mode */}
+          <motion.div
+            layout
+            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            className={`relative flex flex-col items-center justify-center p-12 ${
+              mode === 'signup' ? 'md:order-1' : 'md:order-2'
+            }`}
+            style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)' }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mode}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="text-center"
+              >
+                <h1
+                  className="text-4xl md:text-5xl font-bold mb-4"
+                  style={{
+                    fontFamily: "'Georgia', serif",
+                    color: '#22c55e',
+                    letterSpacing: '-0.02em',
+                  }}
                 >
-                  Welcome back
-                </motion.h1>
-              )}
+                  {headingText}
+                </h1>
+                <p className="text-white/70 text-lg max-w-xs mx-auto">
+                  {subText}
+                </p>
+              </motion.div>
             </AnimatePresence>
-          </div>
+          </motion.div>
 
-          {/* Card area */}
-          <div className="flex items-center justify-center">
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
-              className="w-full md:w-[480px] bg-[#FBF6EC] rounded-2xl shadow-lg p-8"
-            >
-              <h2 className="text-2xl md:text-3xl font-semibold mb-4">
-                {mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
-              </h2>
+          {/* Form side */}
+          <motion.div
+            layout
+            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            className={`flex items-center justify-center p-10 ${
+              mode === 'signup' ? 'md:order-2' : 'md:order-1'
+            }`}
+          >
+            <div className="w-full max-w-sm">
+              <AnimatePresence mode="wait">
+                {mode === 'signup' ? (
+                  <motion.form
+                    key="signup"
+                    onSubmit={handleSubmitSignUp(onSubmitSignUp)}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -30 }}
+                    transition={{ duration: 0.35 }}
+                    className="space-y-5"
+                  >
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">Sign Up</h2>
+                      <p className="text-sm text-gray-500 mt-1">Create your account to get started.</p>
+                    </div>
+                    <Input label="Name" {...registerSignUp('name')} error={signUpErrors.name?.message} />
+                    <Input label="Email" {...registerSignUp('email')} error={signUpErrors.email?.message} />
+                    <Input label="Password" type="password" {...registerSignUp('password')} error={signUpErrors.password?.message} />
+                    <Input label="Confirm Password" type="password" {...registerSignUp('confirmPassword')} error={signUpErrors.confirmPassword?.message} />
 
-              <div>
-                <AnimatePresence mode="wait">
-                  {mode === 'signup' ? (
-                    <motion.form
-                      key="signup"
-                      onSubmit={handleSubmitSignUp(onSubmitSignUp)}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.35 }}
-                      className="space-y-4"
-                    >
-                      <Input label="Name" {...registerSignUp('name')} error={signUpErrors.name?.message} />
-                      <Input label="Email" {...registerSignUp('email')} error={signUpErrors.email?.message} />
-                      <Input label="Password" type="password" {...registerSignUp('password')} error={signUpErrors.password?.message} />
-                      <Input label="Confirm Password" type="password" {...registerSignUp('confirmPassword')} error={signUpErrors.confirmPassword?.message} />
+                    {error && <p className="text-sm text-red-600">{error}</p>}
 
-                      {error && <p className="text-sm text-red-600">{error}</p>}
+                    <Button type="submit" disabled={loading}>
+                      {loading ? 'Creating...' : 'Create Account'}
+                    </Button>
 
-                      <div>
-                        <Button type="submit" disabled={loading}>
-                          {loading ? 'Creating...' : 'Create account'}
-                        </Button>
-                      </div>
+                    <p className="text-sm text-gray-500">
+                      {linkText.prefix}
+                      <button
+                        type="button"
+                        className="font-semibold text-green-600 hover:text-green-700"
+                        onClick={() => {
+                          setMode('signin');
+                          resetSignIn();
+                          setError(null);
+                        }}
+                      >
+                        {linkText.action}
+                      </button>
+                    </p>
+                  </motion.form>
+                ) : (
+                  <motion.form
+                    key="signin"
+                    onSubmit={handleSubmitSignIn(onSubmitSignIn)}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 30 }}
+                    transition={{ duration: 0.35 }}
+                    className="space-y-5"
+                  >
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">Sign In</h2>
+                      <p className="text-sm text-gray-500 mt-1">Welcome back! Please enter your details.</p>
+                    </div>
+                    <Input label="Email" {...registerSignIn('email')} error={signInErrors.email?.message} />
+                    <Input label="Password" type="password" {...registerSignIn('password')} error={signInErrors.password?.message} />
 
-                      <div className="text-sm text-black/70">
-                        <span>Already have an account? </span>
-                        <button
-                          type="button"
-                          className="font-semibold text-black underline-offset-2"
-                          onClick={() => {
-                            setMode('signin');
-                            resetSignIn();
-                            setError(null);
-                          }}
-                        >
-                          Sign In
-                        </button>
-                      </div>
-                    </motion.form>
-                  ) : (
-                    <motion.form
-                      key="signin"
-                      onSubmit={handleSubmitSignIn(onSubmitSignIn)}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.35 }}
-                      className="space-y-4"
-                    >
-                      <Input label="Email" {...registerSignIn('email')} error={signInErrors.email?.message} />
-                      <Input label="Password" type="password" {...registerSignIn('password')} error={signInErrors.password?.message} />
+                    {error && <p className="text-sm text-red-600">{error}</p>}
 
-                      {error && <p className="text-sm text-red-600">{error}</p>}
+                    <Button type="submit" disabled={loading}>
+                      {loading ? 'Signing in...' : 'Sign In'}
+                    </Button>
 
-                      <div>
-                        <Button type="submit" disabled={loading}>
-                          {loading ? 'Signing in...' : 'Sign in'}
-                        </Button>
-                      </div>
-
-                      <div className="text-sm text-black/70">
-                        <span>Don't have an account? </span>
-                        <button
-                          type="button"
-                          className="font-semibold text-black underline-offset-2"
-                          onClick={() => {
-                            setMode('signup');
-                            resetSignUp();
-                            setError(null);
-                          }}
-                        >
-                          Sign Up
-                        </button>
-                      </div>
-                    </motion.form>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          </div>
+                    <p className="text-sm text-gray-500">
+                      {linkText.prefix}
+                      <button
+                        type="button"
+                        className="font-semibold text-green-600 hover:text-green-700"
+                        onClick={() => {
+                          setMode('signup');
+                          resetSignUp();
+                          setError(null);
+                        }}
+                      >
+                        {linkText.action}
+                      </button>
+                    </p>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
